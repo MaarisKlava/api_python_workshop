@@ -1,0 +1,75 @@
+main {
+  margin: 5vh 7.5vw;
+}
+
+.bestseller-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bestseller {
+  width: 30vw;
+  max-width: 300px;
+}
+
+.name {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.bestseller img {
+  width: 100%;
+  height: auto;
+}
+
+a {
+  text-decoration: none;
+  color: #000;
+}
+
+.btn {
+  background-color: #0e7a9b;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+@keyframes disco {
+  0% {
+    background-color: #ff0000;
+    color: #0000ff;
+  }
+  25% {
+    background-color: #00ff00;
+    color: #ff00ff;
+  }
+  50% {
+    background-color: #0000ff;
+    color: #00ff00;
+  }
+  75% {
+    background-color: #ff00ff;
+    color: #ff0000;
+  }
+  100% {
+    background-color: #00ff00;
+    color: #0000ff;
+  }
+}
+
+.btn:hover {
+  animation: disco 1s linear infinite;
+}
+
+.review {
+  text-decoration: line-through;
+}
+
+.review-correction {
+  font-weight: bold;
+}

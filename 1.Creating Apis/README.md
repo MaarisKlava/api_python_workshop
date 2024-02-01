@@ -48,8 +48,7 @@ Owner(admin), Baristas, Customers
 
 - **Order Status**: Information about the status of an order (e.g., pending, preparing, ready, delivered).
 
-<details>
-<summary>1st part - creating User and Product models</summary>
+# 1st part - creating User and Product models
 
 ## ## What are the data attributes associated with a user in the Coffee House application?
 
@@ -68,7 +67,7 @@ Owner(admin), Baristas, Customers
 | ------ | -------- | ----------------- | -------- |
 | 1      | maris    | maris@example.com | secret   |
 
-#2nd Group Work (8minutes)
+#### Group Work (8minutes)
 
 - **What could be data attributes associated with a product in the Coffee House application?**
 
@@ -77,10 +76,7 @@ Owner(admin), Baristas, Customers
 | field | unique | type | automatically assigned by computer | default value |
 | ----- | ------ | ---- | ---------------------------------- | ------------- |
 
-</details>
-
-<details>
-<summary>2nd part - creating routes</summary>
+# 2nd part - creating routes
 
 ## What actions need to be performed on selected data points? What kind of security does the API need(access rights)?
 
@@ -115,14 +111,11 @@ Private/Admin - Only Users with admin right can access
 | Update Users Password | PATCH /api/v1/users/         | Private       |
 | Delete A User         | DELETE /api/v1/users/:userId | Private/Admin |
 
-#2nd Group Work (8minutes)
+#### Group Work (8minutes)
 
-- **Make similar table for Orders API**
+- **Make similar table for Product API**
 
-</details>
-
-<details>
-<summary>3rd part - response or error</summary>
+# 3rd part - response or error
 
 ## How will the API handle errors and communicate these to the client?
 
@@ -152,7 +145,7 @@ It is good practice to give appropriate status code when we send response, but a
 | 502  | BAD_GATEWAY           | Bad Gateway           | The server was acting as a gateway or proxy and received an invalid response from the upstream server.            |
 | 503  | SERVICE_UNAVAILABLE   | Service Unavailable   | The server is currently unable to handle the request due to a temporary overloading or maintenance of the server. |
 
-## If everything is okay - what we want to send to the client?
+## If everything is okay - what we want to send to the client and why?
 
 Success Message
 Data
@@ -177,14 +170,12 @@ This is to prevent abuse of the API.
 
 50 requests in a minute | 150 in 15 minutes
 
-#3rd Group Work (8minutes)
+#### Group Work (8minutes)
 
 - **Select two routes of Product API**
 - **think of cases when we would need to refuse (send Error) when someone is using these routes?**
 - **how would you respond if everything is OK?**
 - **What would you set as rate limit to these routes**
-
-</details>
 
 ## P.S.! APIs need to be Asynchronous (async)!
 
@@ -224,13 +215,9 @@ def create_user():
         return jsonify(error=str(e)), 400
 ```
 
-| @desc                 | @route                       | @access       | @throwError                                                                                                                                                                                                                                     | @OK                                                              |
-| --------------------- | ---------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Create New User       | POST /api/v1/users           | Public        | email exists; server crashes                                                                                                                                                                                                                    | json with message - user created and data without password       |
-| Get All Users         | GET /api/v1/users            | Private/Admin | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes                                                                                    | json with all users data                                         |
-| Get Single User       | GET /api/v1/users/:userId    | Private/Admin | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes; userId does not exist                                                             | json with single users data                                      |
-| Update Users Password | PATCH /api/v1/users/:userId  | Private       | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes; userId does not exist; password and confirmPassword fields in body does not match | json with message - user updated successfully and new users data |
-| Delete A User         | DELETE /api/v1/users/:userId | Private/Admin | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes; userId does not exist                                                             | json with message - user deleted successfully                    |
+| @desc           | @route             | @access | @throwError                  | @OK                                                        |
+| --------------- | ------------------ | ------- | ---------------------------- | ---------------------------------------------------------- |
+| Create New User | POST /api/v1/users | Public  | email exists; server crashes | json with message - user created and data without password |
 
 Please use these formulas to authenticate protected routes accordingly
 def authenticate(username, password):
@@ -243,3 +230,10 @@ def authenticateAdmin(who_is_the_boss):
 if who_is_the_boss != 'IAMTHEBOSS':
 abort(401)
 return True
+
+| Update Users Password | PATCH /api/v1/users/:userId | Private | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes; userId does not exist; password and confirmPassword fields in body does not match | json with message - user updated successfully and new users data |
+| Delete A User | DELETE /api/v1/users/:userId | Private/Admin | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes; userId does not exist | json with message - user deleted successfully |
+
+| Get All Users | GET /api/v1/users | Private/Admin | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes | json with all users data |
+
+| Get Single User | GET /api/v1/users/:userId | Private/Admin | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes; userId does not exist | json with single users data |
