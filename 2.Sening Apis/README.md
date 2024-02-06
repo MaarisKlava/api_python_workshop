@@ -330,7 +330,7 @@ image_link
 Request needs to have headers:
 |key|value|
 |----|----|
-|X_DIRECTIVE_STUFF| X_DIRECTIVE_STUFF (received when logged in) |
+|X-DIRECTIVE-STUFF| X-DIRECTIVE-STUFF (received when logged in) |
 |please| please|
 
 Correct Example: { name: "Latte", brand: "RihardinaCoffee", "description": "It was the worst Coffee", "pct_left": "99", price: "0.05" purchase_date: "yesterday"}
@@ -338,7 +338,7 @@ Correct Example: { name: "Latte", brand: "RihardinaCoffee", "description": "It w
 ##### Update used coffee post Error
 
 wrong id - {message: "Used Coffee Id does not exist"}
-unauthorized - {message: "X_DIRECTIVE_STUFF is incorrect"}
+unauthorized - {message: "X-DIRECTIVE-STUFF is incorrect"}
 please - {message: "what is magical word?"}
 
 no name - {message: "Please provide name"}
@@ -358,7 +358,7 @@ cannot change sold to TRUE through body! - {message: "sold field cannot be modif
 
 ##### Buy used coffee (update) Instruction
 
-Send PUT request to correct route with body that would contain JSON format data
+Send PATCH request to correct route with body that would contain JSON format data
 **Optional fields** - default if not provided
 brand
 image_link
@@ -368,14 +368,14 @@ Request needs to have headers:
 |----|----|
 |username| your-username|
 |api-key| api-key received when logged in <xxxxxxxx> |
-|X_DIRECTIVE_STUFF| X_DIRECTIVE_STUFF (received when logged in) |
+|X-DIRECTIVE-STUFF| X-DIRECTIVE-STUFF (received when logged in) |
 
 Correct Example: { "sold": "TRUE"}
 
 ##### Buy used coffee (update) Error
 
 wrong username or api-key - {message: "Username of Api key is incorrect"}
-unauthorized - {message: "X_DIRECTIVE_STUFF is incorrect"}
+unauthorized - {message: "X-DIRECTIVE-STUFF is incorrect"}
 
 cannot by users own coffee - {message: "cannot by your own used coffee. C'mon, I had more expectations from people who buy used coffee!"}
 coffee has already been sold - {message: "cannot buy this coffee, someone else already got the best deal of his life!"}

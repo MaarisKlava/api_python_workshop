@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, DecimalField, IntegerField, BooleanField
 from wtforms.validators import InputRequired, Email, Length
-import traceback
+# import traceback
 from datetime import datetime, timedelta
 # from itsdangerous.url_safe import TimedJSONWebSignatureSerializer as Serializer
 import shortuuid
@@ -55,6 +55,7 @@ class UsedCoffee(db.Model):
     __tablename__ = 'used_coffee'
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.Integer, db.ForeignKey('users.id'))
+    buyerId = db.Column(db.Integer, db.ForeignKey('users.id'))
     name = db.Column(db.String(255))
     brand = db.Column(db.String(50), default='NO BRAND')
     description = db.Column(db.Text)
@@ -66,6 +67,8 @@ class UsedCoffee(db.Model):
     def to_dict(self):
         return {c.name: float(getattr(self, c.name)) if isinstance(getattr(self, c.name), Decimal) else getattr(self, c.name) for c in self.__table__.columns}
 
+# To clear everything from database
+# db.drop_all()
 # After defining your models and before starting your application // only create models that is not already created
 db.create_all()
 
@@ -237,10 +240,10 @@ def get_user(id):
         return Response(json.dumps(error), status=404)
     data = {"user": {"id": user.id, "username": user.username, "email": user.email}}
     return Response(json.dumps(data), status=200)
-    
-    
-    
-# @desc Create used coffee post	
+
+
+
+# @desc Create used coffee post
 # #route POST /api/v1/used-coffee
 # Private
 
@@ -263,7 +266,7 @@ def create_used_coffee():
             return Response(json.dumps(error), status=400)
         # Get the token from the token header
         token = request.headers.get('token').split(' ')[1]
-        
+
 
         # Check if the token exists in the auth_users table
         user = AuthUser.query.filter_by(token=token).first()
@@ -275,12 +278,12 @@ def create_used_coffee():
         form = UsedCoffeeForm(data=data)
         if form.validate():
             new_coffee = UsedCoffee(
-                userId=user.userId, 
-                name=data['name'], 
-                description=data['description'], 
-                price=data['price'], 
-                pct_left=data['pct_left'], 
-                purchase_date=data['purchase_date'], 
+                userId=user.userId,
+                name=data['name'],
+                description=data['description'],
+                price=data['price'],
+                pct_left=data['pct_left'],
+                purchase_date=data['purchase_date'],
                 sold=False,
                 brand=data.get('brand', 'NO BRAND'),  # use the provided brand or 'Default Brand' if not provided
                 image_link=data.get('image_link', '')  # use the provided image_link or 'Default Image Link' if not provided
@@ -298,13 +301,13 @@ def create_used_coffee():
     except Exception as e:
         return Response(json.dumps({"message": str(e)}), status=500, mimetype='application/json')
 
-    
+
 # @desc Get Users coffee posts
 # @route GET /api/v1/used-coffee/my
 # @access Private/Post Owner
 
 @app.route('/api/v1/used-coffee/my', methods=['GET'])
-def get_all_used_coffee():
+def get_all_users_used_coffee():
     try:
         # Get the headers
         username = request.headers.get('username')
@@ -322,66 +325,205 @@ def get_all_used_coffee():
 
         # Get the user's coffee posts
         user_coffee_posts = UsedCoffee.query.filter_by(userId=user.userId).all()
-        print('USER_COFFEES', user_coffee_posts)  # print the user_coffee_posts list for debugging
+        # print('USER_COFFEES', user_coffee_posts)  # print the user_coffee_posts list for debugging
         # Convert the posts to dictionaries and return them
         data = {"message": "Here you go!", "userId":user.userId, "data": [post.to_dict() for post in user_coffee_posts]}
         return Response(json.dumps(data), status=200, mimetype='application/json')
     except Exception as e:
         return Response(json.dumps({"message": str(e)}), status=500, mimetype='application/json')
 
-# Now you can start your application
-# if __name__ == "__main__":
-#     app.run(debug=True)
+
+# @desc Get All coffee posts
+# @route GET /api/v1/used-coffee
+# @access Public
+
+@app.route('/api/v1/used-coffee', methods=['GET'])
+def get_all_used_coffee():
+    try:
+        # Get all coffee posts
+        all_coffee_posts = UsedCoffee.query.all()
+        # print('ALL_COFFEES', all_coffee_posts)  # print the all_coffee_posts list for debugging
+
+        # Convert the posts to dictionaries and return them
+        data = {"message": "British scientists say that used coffee is good for environment.", "data": [post.to_dict() for post in all_coffee_posts]}
+        return Response(json.dumps(data), status=200, mimetype='application/json')
+    except Exception as e:
+        return Response(json.dumps({"message": str(e)}), status=500, mimetype='application/json')
+
+
+# @desc Get Single coffee posts
+# @route GET /api/v1/used-coffee/:id
+# @access Public
+
+@app.route('/api/v1/used-coffee/<int:id>', methods=['GET'])
+def get_single_used_coffee(id):
+    try:
+        # Get the used coffee post
+        used_coffee_post = UsedCoffee.query.get(id)
+
+        # Check if the post exists
+        if not used_coffee_post:
+            return Response(json.dumps({"message": "Used Coffee Id does not exist"}), status=404, mimetype='application/json')
+
+        # Convert the post to a dictionary and return it
+        data = {"message": "Good Choice! Place Order now and regret later!", "data": used_coffee_post.to_dict()}
+        return Response(json.dumps(data), status=200, mimetype='application/json')
+    except Exception as e:
+        return Response(json.dumps({"message": str(e)}), status=500, mimetype='application/json')
+
+
+# @desc Update coffee posts
+# @route GET /api/v1/used-coffee/:id
+# @access Private
+
+@app.route('/api/v1/used-coffee/<int:id>', methods=['PUT'])
+def update_used_coffee(id):
+    try:
+        # Check headers
+        X_DIRECTIVE_STUFF = request.headers.get('X-DIRECTIVE-STUFF')
+        please = request.headers.get('please')
+        if not please:
+            error = {"message": "What is the magic word?",}
+            return Response(json.dumps(error), status=401, mimetype='application/json')
+        user = AuthUser.query.filter_by(X_DIRECTIVE_STUFF=X_DIRECTIVE_STUFF).first()
+        if not user:
+            return Response(json.dumps({"message": "X-DIRECTIVE-STUFF is incorrect", user:user}), status=401, mimetype='application/json')
+
+        # Get the used coffee post
+        used_coffee_post = UsedCoffee.query.get(id)
+
+        if used_coffee_post.userId != user.userId:
+            return Response(json.dumps({"message": "It is not your used coffee, hands off", "owner_id": used_coffee_post.userId, "your_id": user.userId}), status=401, mimetype='application/json')
+
+
+        # Check if the post exists
+        if not used_coffee_post:
+            return Response(json.dumps({"message": "Used Coffee Id does not exist"}), status=404, mimetype='application/json')
+
+        # Get the request data
+        data = request.get_json()
+        if not data:
+            return Response(json.dumps({"message": "no new data has been provided in body"}), status=400, mimetype='application/json')
+        # Validate the data using the form - all fields are optional in update as used coffee has been created
+        # form = UsedCoffeeForm(data=data)
+        # if not form.validate():
+            # return Response(json.dumps(form.errors), status=400, mimetype='application/json')
+
+        # Check if trying to modify 'sold' field
+        if 'sold' in data and data['sold'] == True:
+            return Response(json.dumps({"message": "sold field cannot be modified"}), status=400, mimetype='application/json')
+
+        # Update the post
+        used_coffee_post.name = data.get('name', used_coffee_post.name)
+        used_coffee_post.description = data.get('description', used_coffee_post.description)
+        used_coffee_post.price = data.get('price', used_coffee_post.price)
+        used_coffee_post.pct_left = data.get('pct_left', used_coffee_post.pct_left)
+        used_coffee_post.purchase_date = data.get('purchase_date', used_coffee_post.purchase_date)
+        used_coffee_post.brand = data.get('brand', used_coffee_post.brand)
+        used_coffee_post.image_link = data.get('image_link', used_coffee_post.image_link)
+
+        # Save the changes
+        db.session.commit()
+
+        # Return the updated post
+        return Response(json.dumps({"message": "GREAT SUCCESS!", "data": used_coffee_post.to_dict()}), status=200, mimetype='application/json')
+    except IntegrityError:
+        return Response(json.dumps({"message": "Coffee already exists"}), status=400, mimetype='application/json')
+    except Exception as e:
+        return Response(json.dumps({"message": str(e)}), status=500, mimetype='application/json')
+
+# @desc Update coffee posts
+# @route GET /api/v1/used-coffee/:id
+# @access Private
+
+
+
+@app.route('/api/v1/used-coffee/buy/<int:id>', methods=['PATCH'])
+def buy_used_coffee(id):
+    try:
+        # Check headers
+        username = request.headers.get('username')
+        api_key = request.headers.get('api-key')
+        X_DIRECTIVE_STUFF = request.headers.get('X-DIRECTIVE-STUFF')
+
+        user = AuthUser.query.filter_by(username=username, api_key=api_key).first()
+        if not user:
+            return Response(json.dumps({"message": "Username or Api key is incorrect"}), status=401, mimetype='application/json')
+
+        if X_DIRECTIVE_STUFF != user.X_DIRECTIVE_STUFF:
+            return Response(json.dumps({"message": "X_DIRECTIVE_STUFF is incorrect"}), status=401, mimetype='application/json')
+
+        # Get the used coffee post
+        used_coffee_post = UsedCoffee.query.get(id)
+
+        if used_coffee_post.userId == user.userId:
+            return Response(json.dumps({"message": "cannot buy your own used coffee. C'mon, I had more expectations from people who buy used coffee!"}), status=401, mimetype='application/json')
+
+        if used_coffee_post.sold:
+            return Response(json.dumps({"message": "cannot buy this coffee, someone else already got the best deal of his life!"}), status=400, mimetype='application/json')
+
+        # Get the request data
+        # data = request.get_json()
+
+        # Update the post
+        used_coffee_post.sold = True
+        used_coffee_post.buyerId = user.userId
+
+
+        # Save the changes
+        db.session.commit()
+
+        # Return the updated post
+        return Response(json.dumps({"message": "Sit, relax and enjoy your used coffee! ", "data": used_coffee_post.to_dict()}), status=200, mimetype='application/json')
+    except Exception as e:
+        return Response(json.dumps({"message": str(e)}), status=500, mimetype='application/json')
 
 
 
 
-# PUBLIC CODE ALLOWED
+# @desc Delete coffee post
+# @route GET /api/v1/used-coffee/:id
+# @access Private
 
-# Please Create Flask with all routes + SQLite project (coffee_house.db) every route needs to be async
-# it is demo project for training, could you avoid password hashing
-# authentication will be sent through headers api_username and api_key for Protected routes. Protected/Admin routes should have additional header 'who_is_the_boss': "IAMTHEBOSS";
-# invoke error if some @throwError column criteria is true
-# could you please add try catch blocks to all routes
 
-# #Users schema:
-# data will be sent in request body.
-# field unique type automatically assigned by computer default value
-# userId true int true -
-# username false string false -
-# email true string false -
-# password false string false -
 
-# #User Routes And Controller Setup:
-# before each route in code, please document it accordingly like this, IMPORTANT!:
+@app.route('/api/v1/used-coffee/<int:id>', methods=['DELETE'])
+def delete_used_coffee(id):
+    try:
+        # Check headers
+        token = request.headers.get('token')
+        banana = request.headers.get('banana')
+        if not banana:
+            error = {"message": "no banana, no delete",}
+            return Response(json.dumps(error), status=401, mimetype='application/json')
+        if not token:
+            error = {"message": "no token provided", "token": request.headers.get('token')}
+            return Response(json.dumps(error), status=401, mimetype='application/json')
 
-# ```py
-# # @desc Create New User
-# # @route POST /api/v1/users
-# # @access Public
-# def create_user():
-#     try:
-#       ....
-#     except Exception as e:
-#         return jsonify(error=str(e)), 400
-# ```
+        # Get the token from the token header
+        token = request.headers.get('token').split(' ')[1]
 
-# | @desc                 | @route                       | @access       | @throwError                                                                                                                                                                                                                                     | @OK                                                              |
-# | --------------------- | ---------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-# | Create New User       | POST /api/v1/users           | Public        | email exists; server crashes                                                                                                                                                                                                                    | json with message - user created and data without password       |
-# | Get All Users         | GET /api/v1/users            | Private/Admin | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes                                                                                    | json with all users data                                         |
-# | Get Single User       | GET /api/v1/users/:userId    | Private/Admin | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes; userId does not exist                                                             | json with single users data                                      |
-# | Update Users Password | PATCH /api/v1/users/:userId  | Private       | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes; userId does not exist; password and confirmPassword fields in body does not match | json with message - user updated successfully and new users data |
-# | Delete A User         | DELETE /api/v1/users/:userId | Private/Admin | need header 'api_username': "username" and "api_key":'password' and both matches db entries; needs header 'who_is_the_boss': "IAMTHEBOSS"; if server crashes; userId does not exist                                                             | json with message - user deleted successfully                    |
 
-# Please use these formulas to authenticate protected routes accordingly
-# def authenticate(username, password):
-# user = User.query.filter_by(username=username, password=password).first()
-# if user is None:
-# abort(401)
-# return user
+        # Check if the token exists in the auth_users table
+        user = AuthUser.query.filter_by(token=token).first()
+        if not user:
+            return Response(json.dumps({"message": "unauthorized to delete this masterpiece"}), status=401, mimetype='application/json')
 
-# def authenticateAdmin(who_is_the_boss):
-# if who_is_the_boss != 'IAMTHEBOSS':
-# abort(401)
-# return True
+        # Get the used coffee post
+        used_coffee_post = UsedCoffee.query.get(id)
+
+        if used_coffee_post.userId != user.userId:
+            return Response(json.dumps({"message": "it is not your used coffee, hands off!"}), status=401, mimetype='application/json')
+
+        # Check if the post exists
+        if not used_coffee_post:
+            return Response(json.dumps({"message": "Used Coffee Id does not exist"}), status=404, mimetype='application/json')
+
+        # Delete the post
+        db.session.delete(used_coffee_post)
+        db.session.commit()
+
+        # Return the deleted post
+        return Response(json.dumps({"message": "Noooooo! What have you done! Used Coffee post deleted. I am sad. ", "data": used_coffee_post.to_dict()}), status=200, mimetype='application/json')
+    except Exception as e:
+        return Response(json.dumps({"message": str(e)}), status=500, mimetype='application/json')
