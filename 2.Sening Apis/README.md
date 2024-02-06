@@ -164,6 +164,12 @@ email and password need to match with values in server, if not send error
 
 ---
 
+# Group Work (5 minutes) 3-4 people
+
+Check each others Postman setup and ask for advice if something did not work.
+
+---
+
 ## Get Single User
 
 ##### Get Single User Instruction
@@ -199,7 +205,6 @@ Request needs to have headers:
 
 ##### Get All Users Error
 
-wrong id - {message: "User Id does not exist"}
 Not authorized - {message: "You are not my boss!"}
 no banana {message: "no banana, no data"}
 
