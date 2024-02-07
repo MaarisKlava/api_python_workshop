@@ -203,6 +203,9 @@ Request needs to have headers:
 |who-is-the-boss| IAMTHEBOSS|
 |banana| banana|
 
+Use Query Params:
+?username=maris | mar | ar | without anything
+
 ##### Get All Users Error
 
 Not authorized - {message: "You are not my boss!"}
@@ -212,6 +215,12 @@ no banana {message: "no banana, no data"}
 
 {message: "here you go boss, thanks for banana", data: [{id: 1, username: "marisklava", email:"test@test.com"}, {id: 2, username: "john dow", email:"test@test.com"}]}
 Password is encrypted in database and excluded for security reasons
+
+---
+
+# Group Work (5 minutes) 3-4 people
+
+Check each others Postman setup and ask for advice if something did not work.
 
 ---
 
@@ -291,6 +300,11 @@ no banana - {message: "no banana, no data"}
 ##### Get all used coffee posts posts Instruction
 
 Send GET request to correct route
+
+Use Query Params:
+?name=turk
+?brand=rih
+?price=>1 | 1 | <1 (greater than 1 euro | 1 euro | less than 1 euro)
 
 ##### Get all used coffee posts posts Error
 
